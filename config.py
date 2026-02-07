@@ -18,6 +18,7 @@ class SMTPConfig:
 @dataclass
 class PropertyDataConfig:
     api_key: str
+    use_mock: bool = False  # Set to True to use mock data instead of real API
 
 
 @dataclass
@@ -52,8 +53,11 @@ def load_config() -> AppConfig:
         email_to=_get_env("EMAIL_TO"),
     )
 
+    # API key is optional if using mock data
+    use_mock = _get_env("USE_MOCK_API", required=False, default="true").lower() == "true"
     propertydata = PropertyDataConfig(
-        api_key=_get_env("PROPERTYDATA_API_KEY"),
+        api_key=_get_env("PROPERTYDATA_API_KEY", required=not use_mock, default=""),
+        use_mock=use_mock,
     )
 
     sheets = GoogleSheetsConfig(
