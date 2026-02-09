@@ -1,5 +1,7 @@
 from config import load_config
 from property_api import PropertyAPIClient, SearchParameters
+from google_sheets import GoogleSheetsReader
+
 
 def main() -> None:
     config = load_config()
@@ -10,6 +12,16 @@ def main() -> None:
     # Test the property API with a sample search
     print("\n--- Testing Property API ---")
     api_client = PropertyAPIClient(config.propertydata)
+
+    print("\n--- Testing Google Sheets ---")
+    try:
+        sheets_reader = GoogleSheetsReader(config.sheets)
+        search_params = sheets_reader.get_search_parameters()
+        print(f"Found {len(search_params)} search parameter(s) in Google Sheets")
+        for params in search_params:
+            print(f"  - {params.location}")
+    except Exception as e:
+        print(f"Error: {e}")
     
     # Create a sample search
     search_params = SearchParameters(
