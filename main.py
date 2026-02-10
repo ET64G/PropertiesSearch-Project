@@ -1,6 +1,7 @@
 from config import load_config
 from property_api import PropertyAPIClient, SearchParameters
 from google_sheets import GoogleSheetsReader
+from email_service import EmailService
 
 
 def main() -> None:
@@ -62,6 +63,20 @@ def main() -> None:
             print(f"   Bedrooms: {prop.bedrooms} | Bathrooms: {prop.bathrooms}")
             print(f"   Type: {prop.property_type}")
             print(f"   {prop.description}")
+
+    # After you have properties, send an email report
+    if properties:
+        print("\n--- Sending Email Report---")
+        email_service = EmailService(config.smtp)
+
+        # Format the email content
+        html_content = email_service.format_properties_email(properties, search_params.location)
+
+        # Send the email
+        subject = f"Property Search Results for: {search_params.location}"
+        email_service.send_email(subject, html_content)
+        
+
 
 if __name__ == "__main__":
     main()
