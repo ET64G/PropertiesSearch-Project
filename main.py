@@ -3,13 +3,19 @@ from property_api import PropertyAPIClient, SearchParameters
 from google_sheets import GoogleSheetsReader
 from email_service import EmailService
 
-
-def main() -> None:
+def load_app_config():
+    """Load and validate all configuration needed by the app."""
     config = load_config()
     print("Config loaded OK")
     print(f"Email from: {config.smtp.email_from}")
+    print(f"Email to: {config.smtp.email_to}")
     print(f"Using mock API: {config.propertydata.use_mock}")
+    return config
     
+
+def main() -> None:
+    config = load_app_config()
+        
     # Test the property API with a sample search
     print("\n--- Testing Property API ---")
     api_client = PropertyAPIClient(config.propertydata)
