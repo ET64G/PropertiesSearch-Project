@@ -83,7 +83,7 @@ class EmailService:
             </div>
             <div class="footer">
                 <p>Property Search completed on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
-                <p>This is an automated email from your Property Search Bot</p>
+                <p>This is an automated email from your Property Search Agent</p>
             </div>
         </body>
         </html>
