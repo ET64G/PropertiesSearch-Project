@@ -95,6 +95,12 @@ htmlcov/
 .txt_files/
 *.mp3
 *.pdf
+layout-view.css
+
+# =====================
+# Google Sheets
+# =====================
+google-credentials.json
 
 
 

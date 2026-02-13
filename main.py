@@ -51,6 +51,7 @@ def run_search_and_email(
     print(f"\nSearching for properties in {search_params.location}...")
     properties = api_client.search_properties(search_params)
 
+    # Print Summary of Properties Found
     print(f"\nFound {len(properties)} properties.")
     for i, prop in enumerate(properties[:5], 1):  # show first 5
         print(f"\n{i}. {prop.address}")

@@ -1,0 +1,96 @@
+TEXT FLOW DIAGRAM
+=================
+
+1. Program start
+   - User runs: python main.py
+
+2. main()
+   - Calls load_app_config()
+
+3. load_app_config()
+   - Calls load_config() from config.py
+   - load_config():
+     - Reads environment variables from .env
+     - Builds AppConfig object:
+       - SMTPConfig
+       - PropertyDataConfig
+       - GoogleSheetsConfig
+   - Prints key config info:
+     - "Email from" address
+     - Whether mock API is being used
+   - Returns config object to main()
+
+4. Back in main()
+   - Creates api_client = PropertyAPIClient(config.propertydata)
+   - Creates email_service = EmailService(config.smtp)
+   - Calls get_search_parameters_from_sheets(config)
+
+5. get_search_parameters_from_sheets(config)
+   - Prints "Reading Search Parameters from Google Sheets"
+   - Tries to:
+     - Create GoogleSheetsReader(config.sheets)
+     - Call reader.get_search_parameters()
+       - Authenticates with Google Sheets API
+       - Opens the spreadsheet by ID
+       - Reads all rows from the worksheet
+       - Interprets first row as headers
+       - Parses each subsequent row into a SearchParameters object
+     - Collects a list of SearchParameters objects (one per row)
+     - Prints how many searches were found and their locations
+     - Returns the list to main()
+   - If any error occurs (e.g., bad ID, missing credentials):
+     - Prints the error message
+     - Prints "Falling back to a single hardcoded search (London)..."
+     - Creates a fallback SearchParameters object for London
+     - Returns a single-item list [fallback]
+
+6. Back in main()
+   - Receives search_params_list (list of SearchParameters)
+   - Loops over each item:
+     for params in search_params_list:
+         run_search_and_email(api_client, email_service, params)
+
+7. run_search_and_email(api_client, email_service, search_params)
+   - Prints details of the search:
+     - Location
+     - Min/max price (or "any" if not set)
+     - Min/max bedrooms (or "any")
+     - Property type (if provided)
+   - Calls:
+     - properties = api_client.search_properties(search_params)
+       - In mock mode:
+         - Generates a realistic list of PropertyListing objects
+         - Uses location, price range, and bedroom filters
+   - Prints summary of properties found:
+     - Total number
+     - For first 5 properties:
+       - Address
+       - Price
+       - Bedrooms and bathrooms
+       - Property type
+       - Description
+     - If more than 5, prints how many extra
+   - If at least one property was found:
+     - Prints "Sending email report..."
+     - Calls:
+       - html_content = email_service.format_properties_email(properties, search_params.location)
+         - Builds an HTML email with header, body, and footer
+         - Formats each property into a styled block
+       - subject = f"Property Search Results: {search_params.location}"
+       - email_service.send_email(subject, html_content)
+         - Connects to SMTP server using SMTPConfig
+         - Starts TLS encryption
+         - Logs in with username and password
+         - Sends the email to EMAIL_TO
+   - If no properties were found:
+     - Prints "No properties found. Skipping email."
+
+8. Loop continues
+   - After run_search_and_email finishes for one SearchParameters,
+     main() moves to the next SearchParameters in search_params_list
+   - Repeats until all searches are processed
+
+9. Program end
+   - main() finishes the loop and returns
+   - Python process exits
+
